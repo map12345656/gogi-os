@@ -1,0 +1,44 @@
+name: Build gogiOS ISO
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          df -h /
+
+      - name: Build ISO
+        run: sudo bash build-gogiOS.sh
+
+      - name: Split ISO into parts under 2 GB
+        run: |
+          mkdir out
+          cd /opt/build-gogiOS
+          sha256sum gogiOS.iso > /home/runner/work/sha256.txt
+          split -b 1900M -d gogiOS.iso "$GITHUB_WORKSPACE/out/gogiOS.iso.part"
+          cp /home/runner/work/sha256.txt "$GITHUB_WORKSPACE/out/"
+
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gogiOS-iso-parts
+          path: out/*
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: gogiOS build ${{ github.run_number }}
+          files: out/*

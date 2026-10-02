@@ -35,8 +35,9 @@ L
 apt-get update
 apt-get install -y linux-generic casper initramfs-tools grub-efi-amd64 \
   xfce4 xfce4-goodies lightdm lightdm-gtk-greeter plank network-manager-gnome \
-  firefox calamares calamares-settings-ubuntu git sassc gtk2-engines-murrine \
+  firefox calamares git sassc gtk2-engines-murrine \
   fonts-inter xdg-user-dirs sudo
+apt-get install -y calamares-settings-debian || true
 # iOS/macOS-style theme (WhiteSur) + icons + cursors
 cd /tmp
 git clone --depth 1 https://github.com/vinceliuice/WhiteSur-gtk-theme.git
